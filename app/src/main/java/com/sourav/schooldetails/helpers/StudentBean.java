@@ -1,9 +1,11 @@
 package com.sourav.schooldetails.helpers;
 
+import java.io.Serializable;
+
 /**
  * Created by sourav on 6/7/16.
  */
-public class StudentBean {
+public class StudentBean implements Serializable {
 
     String name;
     String email;

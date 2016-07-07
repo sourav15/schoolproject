@@ -3,6 +3,8 @@ package com.sourav.schooldetails.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,15 +25,15 @@ import com.sourav.schooldetails.helpers.StudentBean;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     public static String TAG = "MainActivity";
 
     private ListView studentListView;
+    TextView addstudent;
     ArrayList<StudentBean> students;
-    ArrayList<StudentBean> newStudents;
-    StudentBean studentBean;
 
     MyCustomAdapter adapter;
 
@@ -42,15 +44,22 @@ public class MainActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle("Students");
         }
+        addstudent = (TextView) findViewById(R.id.addStudent);
         studentListView = (ListView) findViewById(R.id.studentsListView);
-        newStudents = new ArrayList<>();
-        studentBean = new StudentBean();
+
+        addstudent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), DetailsActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Gson gson = new Gson();
         Type listType = new TypeToken<ArrayList<StudentBean>>() {
         }.getType();
@@ -64,11 +73,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             students = gson.fromJson(oldData,listType);
         }
-        newStudents.add(0,studentBean);
-        for (int i = 0; i < students.size(); i++) {
-            newStudents.add(i+1,students.get(i));
-        }
-        adapter = new MyCustomAdapter(newStudents);
+        adapter = new MyCustomAdapter(students);
         studentListView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
     }
@@ -103,19 +108,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                if (position == 0) {
-                    convertView = getLayoutInflater().inflate(R.layout.item_add, null);
-                    convertView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(getApplicationContext(), DetailsActivity.class);
-                            startActivity(intent);
-                        }
-                    });
-                } else {
+
                    convertView = getLayoutInflater().inflate(R.layout.item_student, null);
                     ImageView Logo = (ImageView) convertView
-                            .findViewById(R.id.logo);
+                            .findViewById(R.id.Logo);
 
                     TextView name = (TextView) convertView
                             .findViewById(R.id.name);
@@ -129,12 +125,52 @@ public class MainActivity extends AppCompatActivity {
                     TextView address = (TextView) convertView
                             .findViewById(R.id.address);
 
-                    StudentBean student = mData.get(position);
+                    final StudentBean student = mData.get(position);
+                    Logo.setVisibility(View.GONE);
                     name.setText(student.getName());
                     email.setText(student.getEmail());
                     mobile.setText(student.getMobile());
                     address.setText(student.getAddress());
-                }
+
+                mobile.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent callIntent = new Intent(Intent.ACTION_CALL);
+                        callIntent.setData(Uri.parse("tel:" + student.getMobile()));
+                        startActivity(callIntent);
+                    }
+                });
+
+                name.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getApplicationContext(), DetailsActivity.class);
+                        intent.putExtra("student",student);
+                        intent.putExtra("edit", true);
+                        startActivity(intent);
+                    }
+                });
+
+                email.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{student.getEmail()});
+                       // intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                       // intent.putExtra(Intent.EXTRA_TEXT, content);
+                        startActivity(intent);
+                    }
+                });
+
+                address.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String uri = String.format(Locale.ENGLISH, "geo:0,0?q="+student.getAddress());
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                        startActivity(intent);
+                    }
+                });
             }
             return convertView;
         }

@@ -8,7 +8,6 @@
         android:icon="@drawable/righttick"
         app:showAsAction="ifRoom|withText"
         android:visible="false"
-        android:title="Search"
         />
 
 </menu>

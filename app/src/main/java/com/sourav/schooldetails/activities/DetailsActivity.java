@@ -2,6 +2,7 @@ package com.sourav.schooldetails.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,14 +30,26 @@ public class DetailsActivity extends AppCompatActivity {
     private EditText mobileEditText;
 
     ArrayList<StudentBean> students;
+    StudentBean student;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        boolean edit = false;
+
+        if(getIntent().getExtras() != null) {
+            student = (StudentBean) getIntent().getSerializableExtra("student");
+            edit = getIntent().getBooleanExtra("edit",false);
+        }
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Add Student");
+            if (edit) {
+                getSupportActionBar().setTitle("Edit Student");
+            } else {
+                getSupportActionBar().setTitle("Add Student");
+            }
         }
 
         nameEditText = (EditText) findViewById(R.id.NameEditTxt);
@@ -81,6 +94,12 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (student != null) {
+            nameEditText.setText(student.getName());
+            mobileEditText.setText(student.getMobile());
+            emailEditText.setText(student.getEmail());
+            addressEditText.setText(student.getAddress());
+        }
     }
 
     public void saveData() {
@@ -90,7 +109,7 @@ public class DetailsActivity extends AppCompatActivity {
         studentBean.setMobile(mobileEditText.getText().toString());
         studentBean.setName(nameEditText.getText().toString());
 
-        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Gson gson = new Gson();
         Type listType = new TypeToken<ArrayList<StudentBean>>() {
         }.getType();

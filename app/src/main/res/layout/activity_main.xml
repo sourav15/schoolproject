@@ -9,10 +9,20 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".activities.MainActivity">
 
+    <TextView
+        android:id="@+id/addStudent"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="8dp"
+        android:textSize="24sp"
+        android:text="Add Student"/>
+
     <ListView
         android:id="@+id/studentsListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addStudent">
 
     </ListView>
 </RelativeLayout>
